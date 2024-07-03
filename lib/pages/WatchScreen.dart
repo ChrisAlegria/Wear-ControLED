@@ -51,8 +51,18 @@ class LEDScreen extends StatefulWidget {
 class _LEDScreenState extends State<LEDScreen> {
   bool _isLEDon = false;
   Color _ledColor = Colors.grey;
-  bool _showMessage = false;
-  Timer? _messageTimer;
+  String _message = '';
+  bool _showColorIcon = false; // Flag to show color icon
+
+  // List of colors to cycle through
+  List<Color> _colorCycle = [
+    Color.fromARGB(255, 27, 255, 35),
+    Color.fromARGB(255, 33, 215, 243),
+    Color.fromARGB(255, 198, 38, 226),
+    Color.fromARGB(255, 255, 25, 9),
+    Color.fromARGB(255, 255, 199, 29),
+  ];
+  int _currentColorIndex = 0;
 
   // Bluetooth
   FlutterBlue flutterBlue = FlutterBlue.instance;
@@ -62,25 +72,35 @@ class _LEDScreenState extends State<LEDScreen> {
   void _toggleLED() {
     setState(() {
       _isLEDon = !_isLEDon;
-      _ledColor =
-          _isLEDon ? const Color.fromARGB(255, 27, 255, 35) : Colors.grey;
-
       if (_isLEDon) {
-        _showUpdateMessage();
+        _ledColor = _colorCycle[_currentColorIndex];
+        _message = 'LED encendido';
+        _showColorIcon = false; // Hide color icon when LED is on
+      } else {
+        _ledColor = Colors.grey;
+        _message = 'LED apagado';
+        _showColorIcon = false; // Hide color icon when LED is off
       }
+      _showUpdateMessage();
     });
   }
 
   void _showUpdateMessage() {
-    setState(() {
-      _showMessage = true;
-    });
-
-    _messageTimer?.cancel();
-    _messageTimer = Timer(const Duration(milliseconds: 1500), () {
+    Timer(Duration(milliseconds: 1500), () {
       setState(() {
-        _showMessage = false;
+        _message = '';
+        _showColorIcon = false; // Hide color icon after message disappears
       });
+    });
+  }
+
+  void _changeColor() {
+    setState(() {
+      _currentColorIndex = (_currentColorIndex + 1) % _colorCycle.length;
+      _ledColor = _colorCycle[_currentColorIndex];
+      _message = 'Se actualizó el color a';
+      _showColorIcon = true; // Show color icon when color changes
+      _showUpdateMessage();
     });
   }
 
@@ -134,9 +154,10 @@ class _LEDScreenState extends State<LEDScreen> {
     setState(() {
       // Assuming received data represents RGB color values
       _ledColor = Color.fromRGBO(value[0], value[1], value[2], 1.0);
+      _message = 'LED actualizado a';
+      _showColorIcon = true; // Show color icon when LED is updated
+      _showUpdateMessage();
     });
-
-    _showUpdateMessage();
   }
 
   void _disconnectDevice() {
@@ -146,6 +167,8 @@ class _LEDScreenState extends State<LEDScreen> {
         _connectedDevice = null;
         _ledColor = Colors.grey; // Reset LED color to default when disconnected
         _isLEDon = false; // Turn off LED when disconnected
+        _message = '';
+        _showColorIcon = false; // Hide color icon when LED is disconnected
       });
     }
   }
@@ -178,29 +201,51 @@ class _LEDScreenState extends State<LEDScreen> {
               ),
             ),
             Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: _isLEDon
-                      ? [
-                          BoxShadow(
-                            color: _ledColor.withOpacity(0.3), // Reduce opacity
-                            blurRadius: 30.0, // Reduce blur radius
-                            spreadRadius: 2.0, // Reduce spread radius
+              child: GestureDetector(
+                onTap: _isLEDon ? _changeColor : null,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: _isLEDon
+                        ? [
+                            BoxShadow(
+                              color: _ledColor.withOpacity(0.3),
+                              blurRadius: 30.0,
+                              spreadRadius: 2.0,
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        Icons.lightbulb_outline,
+                        color: _ledColor,
+                        size: 70.0,
+                      ),
+                      if (_showColorIcon &&
+                          _message ==
+                              'Se actualizó el color a') // Only show color icon when LED color is updated
+                        Positioned(
+                          bottom: 0,
+                          child: Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _ledColor,
+                            ),
                           ),
-                        ]
-                      : [],
-                ),
-                child: Icon(
-                  Icons.lightbulb_outline,
-                  color: _ledColor,
-                  size: 70.0,
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
             AnimatedOpacity(
               duration: const Duration(milliseconds: 500),
-              opacity: _showMessage ? 1.0 : 0.0,
+              opacity: _message.isNotEmpty ? 1.0 : 0.0,
               child: Center(
                 child: Container(
                   decoration: BoxDecoration(
@@ -214,15 +259,21 @@ class _LEDScreenState extends State<LEDScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
-                        'LED actualizado a ',
+                      Text(
+                        '$_message ',
                         style: TextStyle(color: Colors.white),
                       ),
-                      Container(
-                        width: 20,
-                        height: 20,
-                        color: _ledColor,
-                      ),
+                      if (_showColorIcon &&
+                          _message ==
+                              'Se actualizó el color a') // Show color icon only when message is 'Se actualizó el color a'
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _ledColor,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -253,11 +304,5 @@ class _LEDScreenState extends State<LEDScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _messageTimer?.cancel();
-    super.dispose();
   }
 }
