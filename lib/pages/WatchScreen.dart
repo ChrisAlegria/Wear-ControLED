@@ -224,20 +224,6 @@ class _LEDScreenState extends State<LEDScreen> {
                         color: _ledColor,
                         size: 70.0,
                       ),
-                      if (_showColorIcon &&
-                          _message ==
-                              'Se actualizó el color a') // Only show color icon when LED color is updated
-                        Positioned(
-                          bottom: 0,
-                          child: Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: _ledColor,
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -264,8 +250,7 @@ class _LEDScreenState extends State<LEDScreen> {
                         style: TextStyle(color: Colors.white),
                       ),
                       if (_showColorIcon &&
-                          _message ==
-                              'Se actualizó el color a') // Show color icon only when message is 'Se actualizó el color a'
+                          _message.startsWith('Se actualizó el color a'))
                         Container(
                           width: 20,
                           height: 20,
