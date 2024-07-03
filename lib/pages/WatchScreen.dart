@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue/flutter_blue.dart';
 import 'package:wear/wear.dart';
+import 'package:flutter_blue/flutter_blue.dart';
 
 void main() {
   runApp(const MyApp());
@@ -58,55 +58,18 @@ class _LEDScreenState extends State<LEDScreen> {
   FlutterBlue flutterBlue = FlutterBlue.instance;
   BluetoothDevice? _connectedDevice;
   BluetoothCharacteristic? _characteristic;
+  bool _isConnected = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _startScan();
-  }
+  void _toggleLED() {
+    setState(() {
+      _isLEDon = !_isLEDon;
+      _ledColor =
+          _isLEDon ? const Color.fromARGB(255, 27, 255, 35) : Colors.grey;
 
-  void _startScan() {
-    flutterBlue.startScan(timeout: const Duration(seconds: 4));
-
-    flutterBlue.scanResults.listen((results) {
-      for (ScanResult r in results) {
-        if (r.device.name == 'YourDeviceName') {
-          _connectToDevice(r.device);
-          break;
-        }
+      if (_isLEDon) {
+        _showUpdateMessage();
       }
     });
-
-    flutterBlue.stopScan();
-  }
-
-  void _connectToDevice(BluetoothDevice device) async {
-    await device.connect();
-    setState(() {
-      _connectedDevice = device;
-    });
-
-    List<BluetoothService> services = await device.discoverServices();
-    for (BluetoothService service in services) {
-      for (BluetoothCharacteristic characteristic in service.characteristics) {
-        if (characteristic.properties.notify) {
-          _characteristic = characteristic;
-          _characteristic!.setNotifyValue(true);
-          _characteristic!.value.listen((value) {
-            _handleReceivedData(value);
-          });
-        }
-      }
-    }
-  }
-
-  void _handleReceivedData(List<int> value) {
-    setState(() {
-      // Assuming received data represents RGB color values
-      _ledColor = Color.fromRGBO(value[0], value[1], value[2], 1.0);
-    });
-
-    _showUpdateMessage();
   }
 
   void _showUpdateMessage() {
@@ -122,16 +85,72 @@ class _LEDScreenState extends State<LEDScreen> {
     });
   }
 
-  void _toggleLED() {
-    setState(() {
-      _isLEDon = !_isLEDon;
-      _ledColor =
-          _isLEDon ? const Color.fromARGB(255, 27, 255, 35) : Colors.grey;
+  void _startScan() async {
+    try {
+      await flutterBlue.startScan(timeout: const Duration(seconds: 4));
 
-      if (_isLEDon) {
-        _showUpdateMessage();
+      flutterBlue.scanResults.listen((results) {
+        for (ScanResult r in results) {
+          if (r.device.name == 'YourDeviceName') {
+            _connectToDevice(r.device);
+            break;
+          }
+        }
+      });
+
+      flutterBlue.stopScan();
+    } catch (e) {
+      print('Error starting scan: $e');
+      // Handle error starting scan (e.g., show error message)
+    }
+  }
+
+  void _connectToDevice(BluetoothDevice device) async {
+    try {
+      await device.connect();
+      setState(() {
+        _connectedDevice = device;
+        _isConnected = true;
+      });
+
+      List<BluetoothService> services = await device.discoverServices();
+      for (BluetoothService service in services) {
+        for (BluetoothCharacteristic characteristic
+            in service.characteristics) {
+          if (characteristic.properties.notify) {
+            _characteristic = characteristic;
+            _characteristic!.setNotifyValue(true);
+            _characteristic!.value.listen((value) {
+              _handleReceivedData(value);
+            });
+          }
+        }
       }
+    } catch (e) {
+      print('Error connecting to device: $e');
+      // Handle error connecting to device (e.g., show error message)
+    }
+  }
+
+  void _handleReceivedData(List<int> value) {
+    setState(() {
+      // Assuming received data represents RGB color values
+      _ledColor = Color.fromRGBO(value[0], value[1], value[2], 1.0);
     });
+
+    _showUpdateMessage();
+  }
+
+  void _disconnectDevice() {
+    if (_connectedDevice != null) {
+      _connectedDevice!.disconnect();
+      setState(() {
+        _connectedDevice = null;
+        _isConnected = false;
+        _ledColor = Colors.grey; // Reset LED color to default when disconnected
+        _isLEDon = false; // Turn off LED when disconnected
+      });
+    }
   }
 
   @override
