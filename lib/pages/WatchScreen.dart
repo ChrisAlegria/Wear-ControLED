@@ -97,6 +97,8 @@ class _LEDScreenState extends State<LEDScreen> {
   }
 
   void _changeColor() {
+    if (!_isLEDon) return; // Prevent color change if LED is off
+
     setState(() {
       _currentColorIndex = (_currentColorIndex + 1) % _colorCycle.length;
       _ledColor = _colorCycle[_currentColorIndex];
@@ -178,7 +180,8 @@ class _LEDScreenState extends State<LEDScreen> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _changeColor, // Call _changeColor on tap anywhere
+      onTap:
+          _isLEDon ? _changeColor : null, // Call _changeColor only if LED is on
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 19, 19, 19),
         body: SafeArea(
@@ -206,7 +209,9 @@ class _LEDScreenState extends State<LEDScreen> {
               ),
               Center(
                 child: GestureDetector(
-                  onTap: _isLEDon ? _changeColor : null,
+                  onTap: _isLEDon
+                      ? _changeColor
+                      : null, // Call _changeColor only if LED is on
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
