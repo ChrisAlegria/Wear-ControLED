@@ -175,117 +175,120 @@ class _LEDScreenState extends State<LEDScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 19, 19, 19),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              top: 35,
-              left: 0,
-              right: 0,
-              child: Column(
-                children: [
-                  Text(
-                    'Wear ControLED',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.bold, // Bold font weight
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 5,
-                  ), // Adjust this height to move the icon down
-                ],
-              ),
-            ),
-            Center(
-              child: GestureDetector(
-                onTap: _isLEDon ? _changeColor : null,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: _isLEDon
-                        ? [
-                            BoxShadow(
-                              color: _ledColor.withOpacity(0.3),
-                              blurRadius: 30.0,
-                              spreadRadius: 2.0,
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Icon(
-                        Icons.lightbulb_outline,
-                        color: _ledColor,
-                        size: 70.0,
+    return GestureDetector(
+      onTap: _changeColor, // Call _changeColor on tap anywhere
+      child: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 19, 19, 19),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Positioned(
+                top: 35,
+                left: 0,
+                right: 0,
+                child: Column(
+                  children: [
+                    Text(
+                      'Wear ControLED',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold, // Bold font weight
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ), // Adjust this height to move the icon down
+                  ],
                 ),
               ),
-            ),
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 500),
-              opacity: _message.isNotEmpty ? 1.0 : 0.0,
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8.0,
-                    horizontal: 16.0,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '$_message ',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      if (_showColorIcon &&
-                          _message.startsWith('Se actualizó el color a'))
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _ledColor,
-                          ),
+              Center(
+                child: GestureDetector(
+                  onTap: _isLEDon ? _changeColor : null,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: _isLEDon
+                          ? [
+                              BoxShadow(
+                                color: _ledColor.withOpacity(0.3),
+                                blurRadius: 30.0,
+                                spreadRadius: 2.0,
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Icon(
+                          Icons.lightbulb_outline,
+                          color: _ledColor,
+                          size: 70.0,
                         ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 10,
-              right: 10,
-              child: GestureDetector(
-                onTap: _toggleLED,
-                child: Container(
-                  padding: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.power_settings_new,
-                      color: _isLEDon ? _ledColor : Colors.white,
-                      size: 20.0,
+                      ],
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 500),
+                opacity: _message.isNotEmpty ? 1.0 : 0.0,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8.0,
+                      horizontal: 16.0,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '$_message ',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        if (_showColorIcon &&
+                            _message.startsWith('Se actualizó el color a'))
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _ledColor,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 10,
+                right: 10,
+                child: GestureDetector(
+                  onTap: _toggleLED,
+                  child: Container(
+                    padding: const EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[800],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        Icons.power_settings_new,
+                        color: _isLEDon ? _ledColor : Colors.white,
+                        size: 20.0,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
