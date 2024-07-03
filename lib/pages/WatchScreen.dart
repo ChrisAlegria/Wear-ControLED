@@ -280,7 +280,9 @@ class _LEDScreenState extends State<LEDScreen> {
                     child: Center(
                       child: Icon(
                         Icons.power_settings_new,
-                        color: _isLEDon ? _ledColor : Colors.white,
+                        color: _isLEDon
+                            ? _ledColor
+                            : Color.fromARGB(255, 120, 120, 120),
                         size: 20.0,
                       ),
                     ),
