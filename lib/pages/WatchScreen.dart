@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:wear/wear.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:wear/wear.dart';
 
 void main() {
   runApp(const MyApp());
@@ -58,7 +58,6 @@ class _LEDScreenState extends State<LEDScreen> {
   FlutterBlue flutterBlue = FlutterBlue.instance;
   BluetoothDevice? _connectedDevice;
   BluetoothCharacteristic? _characteristic;
-  bool _isConnected = false;
 
   void _toggleLED() {
     setState(() {
@@ -78,7 +77,7 @@ class _LEDScreenState extends State<LEDScreen> {
     });
 
     _messageTimer?.cancel();
-    _messageTimer = Timer(const Duration(milliseconds: 500), () {
+    _messageTimer = Timer(const Duration(milliseconds: 1500), () {
       setState(() {
         _showMessage = false;
       });
@@ -110,7 +109,6 @@ class _LEDScreenState extends State<LEDScreen> {
       await device.connect();
       setState(() {
         _connectedDevice = device;
-        _isConnected = true;
       });
 
       List<BluetoothService> services = await device.discoverServices();
@@ -146,7 +144,6 @@ class _LEDScreenState extends State<LEDScreen> {
       _connectedDevice!.disconnect();
       setState(() {
         _connectedDevice = null;
-        _isConnected = false;
         _ledColor = Colors.grey; // Reset LED color to default when disconnected
         _isLEDon = false; // Turn off LED when disconnected
       });
@@ -175,7 +172,8 @@ class _LEDScreenState extends State<LEDScreen> {
                     ),
                   ),
                   const SizedBox(
-                      height: 5), // Adjust this height to move the icon down
+                    height: 5,
+                  ), // Adjust this height to move the icon down
                 ],
               ),
             ),
@@ -200,11 +198,19 @@ class _LEDScreenState extends State<LEDScreen> {
                 ),
               ),
             ),
-            if (_showMessage)
-              Center(
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 500),
+              opacity: _showMessage ? 1.0 : 0.0,
+              child: Center(
                 child: Container(
-                  color: Colors.black54,
-                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8.0,
+                    horizontal: 16.0,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -221,6 +227,7 @@ class _LEDScreenState extends State<LEDScreen> {
                   ),
                 ),
               ),
+            ),
             Positioned(
               bottom: 0,
               left: 10,
