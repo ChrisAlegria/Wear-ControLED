@@ -52,10 +52,9 @@ class _LEDScreenState extends State<LEDScreen> {
   bool _isLEDon = false;
   Color _ledColor = Colors.grey;
   String _message = '';
-  bool _showColorIcon = false; // Flag to show color icon
-  Timer? _messageTimer; // Timer to control message display
+  bool _showColorIcon = false;
+  Timer? _messageTimer;
 
-  // List of colors to cycle through
   List<Color> _colorCycle = [
     Color.fromARGB(255, 27, 255, 35),
     Color.fromARGB(255, 33, 215, 243),
@@ -74,36 +73,36 @@ class _LEDScreenState extends State<LEDScreen> {
     setState(() {
       _isLEDon = !_isLEDon;
       if (_isLEDon) {
-        _ledColor = _colorCycle[_currentColorIndex];
+        _ledColor = Colors.white;
         _message = 'LED encendido';
-        _showColorIcon = false; // Hide color icon when LED is on
+        _showColorIcon = false;
       } else {
-        _ledColor = Colors.grey;
+        _ledColor = const Color.fromARGB(255, 73, 73, 73);
         _message = 'LED apagado';
-        _showColorIcon = false; // Hide color icon when LED is off
+        _showColorIcon = false;
       }
       _showUpdateMessage();
     });
   }
 
   void _showUpdateMessage() {
-    _messageTimer?.cancel(); // Cancel any existing timer
+    _messageTimer?.cancel();
     _messageTimer = Timer(Duration(milliseconds: 1500), () {
       setState(() {
         _message = '';
-        _showColorIcon = false; // Hide color icon after message disappears
+        _showColorIcon = false;
       });
     });
   }
 
   void _changeColor() {
-    if (!_isLEDon) return; // Prevent color change if LED is off
+    if (!_isLEDon) return;
 
     setState(() {
       _currentColorIndex = (_currentColorIndex + 1) % _colorCycle.length;
       _ledColor = _colorCycle[_currentColorIndex];
       _message = 'Se actualizó el color a';
-      _showColorIcon = true; // Show color icon when color changes
+      _showColorIcon = true;
       _showUpdateMessage();
     });
   }
@@ -124,7 +123,6 @@ class _LEDScreenState extends State<LEDScreen> {
       flutterBlue.stopScan();
     } catch (e) {
       print('Error starting scan: $e');
-      // Handle error starting scan (e.g., show error message)
     }
   }
 
@@ -150,16 +148,14 @@ class _LEDScreenState extends State<LEDScreen> {
       }
     } catch (e) {
       print('Error connecting to device: $e');
-      // Handle error connecting to device (e.g., show error message)
     }
   }
 
   void _handleReceivedData(List<int> value) {
     setState(() {
-      // Assuming received data represents RGB color values
       _ledColor = Color.fromRGBO(value[0], value[1], value[2], 1.0);
       _message = 'LED actualizado a';
-      _showColorIcon = true; // Show color icon when LED is updated
+      _showColorIcon = true;
       _showUpdateMessage();
     });
   }
@@ -169,10 +165,10 @@ class _LEDScreenState extends State<LEDScreen> {
       _connectedDevice!.disconnect();
       setState(() {
         _connectedDevice = null;
-        _ledColor = Colors.grey; // Reset LED color to default when disconnected
-        _isLEDon = false; // Turn off LED when disconnected
+        _ledColor = Colors.grey;
+        _isLEDon = false;
         _message = '';
-        _showColorIcon = false; // Hide color icon when LED is disconnected
+        _showColorIcon = false;
       });
     }
   }
@@ -180,8 +176,7 @@ class _LEDScreenState extends State<LEDScreen> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap:
-          _isLEDon ? _changeColor : null, // Call _changeColor only if LED is on
+      onTap: _isLEDon ? _changeColor : null,
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 19, 19, 19),
         body: SafeArea(
@@ -198,20 +193,18 @@ class _LEDScreenState extends State<LEDScreen> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 15.0,
-                        fontWeight: FontWeight.bold, // Bold font weight
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(
                       height: 5,
-                    ), // Adjust this height to move the icon down
+                    ),
                   ],
                 ),
               ),
               Center(
                 child: GestureDetector(
-                  onTap: _isLEDon
-                      ? _changeColor
-                      : null, // Call _changeColor only if LED is on
+                  onTap: _isLEDon ? _changeColor : null,
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
