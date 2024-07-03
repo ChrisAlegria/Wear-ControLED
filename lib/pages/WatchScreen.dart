@@ -232,7 +232,7 @@ class _LEDScreenState extends State<LEDScreen> {
                 ),
               ),
               AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 600),
                 opacity: _message.isNotEmpty ? 1.0 : 0.0,
                 child: Center(
                   child: Container(
