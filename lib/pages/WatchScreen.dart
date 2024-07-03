@@ -53,6 +53,7 @@ class _LEDScreenState extends State<LEDScreen> {
   Color _ledColor = Colors.grey;
   String _message = '';
   bool _showColorIcon = false; // Flag to show color icon
+  Timer? _messageTimer; // Timer to control message display
 
   // List of colors to cycle through
   List<Color> _colorCycle = [
@@ -86,7 +87,8 @@ class _LEDScreenState extends State<LEDScreen> {
   }
 
   void _showUpdateMessage() {
-    Timer(Duration(milliseconds: 1500), () {
+    _messageTimer?.cancel(); // Cancel any existing timer
+    _messageTimer = Timer(Duration(milliseconds: 1500), () {
       setState(() {
         _message = '';
         _showColorIcon = false; // Hide color icon after message disappears
@@ -232,7 +234,7 @@ class _LEDScreenState extends State<LEDScreen> {
                 ),
               ),
               AnimatedOpacity(
-                duration: const Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 700),
                 opacity: _message.isNotEmpty ? 1.0 : 0.0,
                 child: Center(
                   child: Container(
